@@ -4,6 +4,7 @@ serviceAccountKey.json
 *.json
 !vercel.json
 !package.json
+!firebase-config.js
 
 # Environment variables
 .env
