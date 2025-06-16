@@ -19,20 +19,6 @@ console.log('Environment check:', {
   VERCEL_URL: process.env.VERCEL_URL || 'Not set'
 });
 
-// Initialize Firebase Admin
-try {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    })
-  });
-  console.log('Firebase Admin initialized successfully');
-} catch (error) {
-  console.error('Firebase Admin initialization error:', error);
-}
-
 // JWT Secret Key - In production, use environment variable
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
