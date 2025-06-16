@@ -111,7 +111,7 @@ const swaggerOptions = {
   apis: ['./index.js'],
 };
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
+const swaggerSpec = swaggerJsDoc(swaggerOptions);
 
 // API Routes
 const router = express.Router();
@@ -478,19 +478,22 @@ router.get('/bank/profile', authenticateToken, async (req, res) => {
 // Mount API routes
 app.use('/api', router);
 
-// Swagger UI setup - must be after API routes
+// Serve Swagger UI
+app.get('/api-docs', (req, res) => {
+  res.redirect('/api-docs/');
+});
+
+app.get('/api-docs/', (req, res) => {
+  res.send(swaggerUi.generateHTML(swaggerSpec));
+});
+
+app.get('/api-docs/swagger.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+// Serve Swagger UI assets
 app.use('/api-docs', swaggerUi.serve);
-app.get('/api-docs', swaggerUi.setup(swaggerDocs, {
-  explorer: true,
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: "Bank API Documentation",
-  swaggerOptions: {
-    persistAuthorization: true,
-    docExpansion: 'list',
-    filter: true,
-    showCommonExtensions: true
-  }
-}));
 
 // Root route - must be last
 app.get('/', (req, res) => {
