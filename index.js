@@ -478,7 +478,7 @@ router.get('/bank/profile', authenticateToken, async (req, res) => {
 // Mount API routes
 app.use('/api', router);
 
-// Swagger UI setup
+// Serve Swagger UI
 app.use('/api-docs', swaggerUi.serve);
 app.get('/api-docs', swaggerUi.setup(swaggerSpec, {
   explorer: true,
@@ -488,9 +488,16 @@ app.get('/api-docs', swaggerUi.setup(swaggerSpec, {
     persistAuthorization: true,
     docExpansion: 'list',
     filter: true,
-    showCommonExtensions: true
+    showCommonExtensions: true,
+    url: '/api-docs/swagger.json'
   }
 }));
+
+// Serve Swagger JSON
+app.get('/api-docs/swagger.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
 
 // Root route - must be last
 app.get('/', (req, res) => {
