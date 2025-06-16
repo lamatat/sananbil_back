@@ -1,6 +1,7 @@
 # Firebase configuration
 firebase-config.js
 serviceAccountKey.json
+*.json
 
 # Environment variables
 .env
