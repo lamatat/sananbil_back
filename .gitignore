@@ -1,4 +1,5 @@
 # Firebase configuration
+firebase-config.js
 serviceAccountKey.json
 
 # Environment variables
@@ -48,6 +49,4 @@ logs
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db firebase-config.js
-sanabil-project-firebase-adminsdk-fbsvc-63d3abb781.json
-.env
+Thumbs.db 
