@@ -3,6 +3,7 @@ firebase-config.js
 serviceAccountKey.json
 *.json
 !vercel.json
+!package.json
 
 # Environment variables
 .env
@@ -11,6 +12,7 @@ serviceAccountKey.json
 
 # Dependencies
 node_modules/
+package-lock.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
