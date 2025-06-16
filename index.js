@@ -85,121 +85,30 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Bank API Documentation',
+      title: 'Sananbil Bank API',
       version: '1.0.0',
-      description: 'API documentation for Bank Management System with Firebase integration',
-      contact: {
-        name: 'API Support',
-        email: 'support@example.com'
-      }
+      description: 'API documentation for Sananbil Bank application',
     },
     servers: [
       {
         url: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000',
-        description: process.env.VERCEL_URL ? 'Production server' : 'Development server',
+        description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
       },
-    ],
-    tags: [
-      {
-        name: 'Bank',
-        description: 'Bank user management endpoints'
-      },
-      {
-        name: 'Firebase',
-        description: 'Firebase connection test endpoints'
-      }
     ],
     components: {
       securitySchemes: {
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
-          bearerFormat: 'JWT'
-        }
+          bearerFormat: 'JWT',
+        },
       },
-      schemas: {
-        BankUser: {
-          type: 'object',
-          required: ['username', 'password', 'bank_name'],
-          properties: {
-            username: {
-              type: 'string',
-              description: 'Bank user\'s username',
-              example: 'bankuser1'
-            },
-            password: {
-              type: 'string',
-              description: 'Bank user\'s password',
-              example: 'securepassword123'
-            },
-            bank_name: {
-              type: 'string',
-              description: 'Name of the bank',
-              example: 'National Bank'
-            }
-          }
-        },
-        BankUserResponse: {
-          type: 'object',
-          properties: {
-            username: {
-              type: 'string',
-              example: 'bankuser1'
-            },
-            bank_name: {
-              type: 'string',
-              example: 'National Bank'
-            },
-            created_at: {
-              type: 'string',
-              format: 'date-time',
-              example: '2024-03-21T12:00:00Z'
-            }
-          }
-        },
-        LoginResponse: {
-          type: 'object',
-          properties: {
-            success: {
-              type: 'boolean',
-              example: true
-            },
-            message: {
-              type: 'string',
-              example: 'Login successful'
-            },
-            data: {
-              type: 'object',
-              properties: {
-                user: {
-                  $ref: '#/components/schemas/BankUserResponse'
-                },
-                token: {
-                  type: 'string',
-                  description: 'JWT access token',
-                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-                }
-              }
-            }
-          }
-        },
-        Error: {
-          type: 'object',
-          properties: {
-            success: {
-              type: 'boolean',
-              example: false
-            },
-            message: {
-              type: 'string',
-              example: 'Error message'
-            }
-          }
-        }
-      }
-    }
+    },
+    security: [{
+      bearerAuth: [],
+    }],
   },
-  apis: ['./index.js'], // Path to the API docs
+  apis: ['./index.js'],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
