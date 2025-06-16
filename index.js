@@ -478,22 +478,19 @@ router.get('/bank/profile', authenticateToken, async (req, res) => {
 // Mount API routes
 app.use('/api', router);
 
-// Serve Swagger UI
-app.get('/api-docs', (req, res) => {
-  res.redirect('/api-docs/');
-});
-
-app.get('/api-docs/', (req, res) => {
-  res.send(swaggerUi.generateHTML(swaggerSpec));
-});
-
-app.get('/api-docs/swagger.json', (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.send(swaggerSpec);
-});
-
-// Serve Swagger UI assets
+// Swagger UI setup
 app.use('/api-docs', swaggerUi.serve);
+app.get('/api-docs', swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "Sananbil Bank API Documentation",
+  swaggerOptions: {
+    persistAuthorization: true,
+    docExpansion: 'list',
+    filter: true,
+    showCommonExtensions: true
+  }
+}));
 
 // Root route - must be last
 app.get('/', (req, res) => {
