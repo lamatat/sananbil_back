@@ -10,6 +10,17 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 
+// Log environment variables (without sensitive values)
+console.log('Environment check:', {
+  NODE_ENV: process.env.NODE_ENV,
+  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? 'Set' : 'Not set',
+  FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL ? 'Set' : 'Not set',
+  FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY ? 'Set' : 'Not set',
+  FIREBASE_DATABASE_URL: process.env.FIREBASE_DATABASE_URL ? 'Set' : 'Not set',
+  JWT_SECRET: process.env.JWT_SECRET ? 'Set' : 'Not set',
+  VERCEL_URL: process.env.VERCEL_URL || 'Not set'
+});
+
 // JWT Secret Key - In production, use environment variable
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -37,6 +48,7 @@ app.use((req, res, next) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
+  console.error('Error stack:', err.stack);
   res.status(500).json({
     success: false,
     message: 'Internal Server Error',
@@ -578,8 +590,15 @@ app.get('/', (req, res) => {
   res.redirect('/api-docs');
 });
 
-// Start server
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}/`);
-  console.log(`Swagger documentation available at http://localhost:${port}/api-docs`);
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    vercelUrl: process.env.VERCEL_URL
+  });
 });
+
+// Export the Express API
+module.exports = app;
