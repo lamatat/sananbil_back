@@ -83,4 +83,69 @@ router.post('/account', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/user/all:
+ *   get:
+ *     summary: Get all users
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: List of all users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         description: User's document ID
+ *                       full_name:
+ *                         type: string
+ *                         description: User's full name
+ *                       nationalID:
+ *                         type: string
+ *                         description: User's national ID
+ *                       accountID:
+ *                         type: string
+ *                         description: User's account ID
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/all', async (req, res) => {
+  try {
+    const usersRef = admin.firestore().collection('users');
+    const snapshot = await usersRef.get();
+
+    if (snapshot.empty) {
+      return res.json({
+        users: [],
+        message: 'No users found'
+      });
+    }
+
+    const users = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    res.json({
+      users,
+      message: 'Users retrieved successfully'
+    });
+
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to fetch users'
+    });
+  }
+});
+
 module.exports = router; 
