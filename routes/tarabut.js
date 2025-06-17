@@ -5,6 +5,7 @@ const verifyToken = require('../middleware/auth');
 // Mock data for two accounts
 const ACCOUNT_1 = "7eeec027-16d2-41bf-abad-70a81aabb2b3";
 const ACCOUNT_2 = "c5950a78-122e-3fba-b8c7-8d43914bfe92";
+const ACCOUNT_3 = "d8f7e6c5-4b3a-2c1d-9e8f-7a6b5c4d3e2f";
 
 // Mock data for testing
 const mockAccounts = {
