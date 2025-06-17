@@ -9,8 +9,13 @@ const cors = require('cors');
 const bankRouter = require('./routes/bank');
 const tarabutRouter = require('./routes/tarabut');
 const userRouter = require('./routes/user');
+const helmet = require('helmet');
 
 const app = express();
+
+// Security middleware
+app.use(helmet()); // Adds various HTTP headers for security
+app.disable('x-powered-by'); // Explicitly disable X-Powered-By header
 
 // Ensure JWT_SECRET is set
 if (!process.env.JWT_SECRET) {
