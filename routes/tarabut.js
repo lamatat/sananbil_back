@@ -6,6 +6,47 @@ const verifyToken = require('../middleware/auth');
 const ACCOUNT_1 = "7eeec027-16d2-41bf-abad-70a81aabb2b3";
 const ACCOUNT_2 = "c5950a78-122e-3fba-b8c7-8d43914bfe92";
 
+// Mock data for testing
+const mockAccounts = {
+  '1234567890': {
+    accounts: [
+      {
+        id: 'ACCOUNT_1',
+        balance: 10000,
+        transactions: [
+          { type: 'SALARY', amount: 5000, date: '2024-03-01' },
+          { type: 'SALARY', amount: 5000, date: '2024-02-01' },
+          { type: 'SALARY', amount: 5000, date: '2024-01-01' }
+        ],
+        balanceTrend: 'stable'
+      },
+      {
+        id: 'ACCOUNT_2',
+        balance: 75000,
+        transactions: [
+          { type: 'SALARY', amount: 25000, date: '2024-03-01' },
+          { type: 'SALARY', amount: 25000, date: '2024-02-01' },
+          { type: 'SALARY', amount: 25000, date: '2024-01-01' }
+        ],
+        balanceTrend: 'positive'
+      },
+      {
+        id: 'ACCOUNT_3',
+        balance: 5000,
+        transactions: [
+          { type: 'SALARY', amount: 3000, date: '2024-03-01' },
+          { type: 'SALARY', amount: 3000, date: '2024-02-01' },
+          { type: 'SALARY', amount: 3000, date: '2024-01-01' },
+          { type: 'LOAN_PAYMENT', amount: 2000, date: '2024-03-15' },
+          { type: 'LOAN_PAYMENT', amount: 2000, date: '2024-02-15' },
+          { type: 'LOAN_PAYMENT', amount: 2000, date: '2024-01-15' }
+        ],
+        balanceTrend: 'negative'
+      }
+    ]
+  }
+};
+
 /**
  * @swagger
  * /api/tarabut/balance:
