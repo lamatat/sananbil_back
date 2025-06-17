@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const bankRouter = require('./routes/bank');
 const tarabutRouter = require('./routes/tarabut');
+const userRouter = require('./routes/user');
 
 const app = express();
 
@@ -87,14 +88,14 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Sananbil Bank API',
+      title: 'Sananbil API Documentation',
       version: '1.0.0',
-      description: 'API documentation for Sananbil Bank application',
+      description: 'API documentation for Sananbil application',
     },
     servers: [
       {
         url: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000',
-        description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
+        description: 'API Server',
       },
     ],
     components: {
@@ -106,11 +107,8 @@ const swaggerOptions = {
         },
       },
     },
-    security: [{
-      bearerAuth: [],
-    }],
   },
-  apis: ['./index.js'],
+  apis: ['./routes/*.js'], // Path to the API routes
 };
 
 const swaggerSpec = swaggerJsDoc(swaggerOptions);
@@ -481,13 +479,14 @@ router.get('/bank/profile', authenticateToken, async (req, res) => {
 app.use('/api', router);
 app.use('/api/bank', bankRouter);
 app.use('/api/tarabut', tarabutRouter);
+app.use('/api/user', userRouter);
 
 // Serve Swagger UI
 app.use('/api-docs', swaggerUi.serve);
 app.get('/api-docs', swaggerUi.setup(swaggerSpec, {
   explorer: true,
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: "Sananbil Bank API Documentation",
+  customSiteTitle: "Sananbil API Documentation",
   swaggerOptions: {
     persistAuthorization: true,
     docExpansion: 'list',
