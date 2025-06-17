@@ -64,16 +64,15 @@ router.get('/balance', verifyToken, (req, res) => {
     [ACCOUNT_2]: {
       "balances": [
         {
-          "type": "ClosingAvailable",
+          "accountId": ACCOUNT_2,
           "amount": {
-            "value": 1500.75,
+            "value": 75000,
             "currency": "SAR"
-          }
+          },
+          "dateTime": "2024-03-01T00:00:00.000Z",
+          "creditLineIncluded": false
         }
-      ],
-      "meta": {
-        "lastBalancesUpdateDatetime": "2024-04-16T11:30:22.123456Z"
-      }
+      ]
     }
   };
 
@@ -208,15 +207,15 @@ router.get('/transactions', verifyToken, (req, res) => {
           "transactionId": "a4a5f506-2c83-3f92-ba59-ad8da5094d21",
           "accountId": ACCOUNT_2,
           "providerId": "BLUE",
-          "transactionDescription": "Rental Income - Property XYZ",
+          "transactionDescription": "Salary - Company XYZ",
           "transactionType": "CREDIT",
-          "subTransactionType": "Rental",
+          "subTransactionType": "Salary",
           "merchant": {
             "merchantCategoryCode": ""
           },
           "creditDebitIndicator": "Credit",
           "amount": {
-            "value": 12000,
+            "value": 25000,
             "currency": "SAR"
           },
           "bookingDateTime": "2023-01-09T00:00:00.000Z"
@@ -322,32 +321,10 @@ router.get('/balance-insights', verifyToken, (req, res) => {
       "accountProductType": "account"
     },
     [ACCOUNT_2]: {
-      "minBalance": {
-        "date": "2023-08-15",
-        "amount": {
-          "value": 2500,
-          "currency": "SAR"
-        }
-      },
-      "maxBalance": {
-        "date": "2023-08-01",
-        "amount": {
-          "value": 15000,
-          "currency": "SAR"
-        }
-      },
-      "averageBalance": {
-        "amount": {
-          "value": 8750,
-          "currency": "SAR"
-        }
-      },
-      "trend": "stable",
-      "from": "2023-02-01",
-      "to": "2023-09-30",
-      "accountId": ACCOUNT_2,
-      "providerId": "BLUE",
-      "accountProductType": "account"
+      "trend": "positive",
+      "averageBalance": 75000,
+      "minimumBalance": 50000,
+      "maximumBalance": 100000
     }
   };
 
@@ -450,15 +427,15 @@ router.get('/income-insights', verifyToken, (req, res) => {
           "accountCurrency": "SAR",
           "source": "Bank API",
           "lastUpdated": "2023-10-04T00:00:00.123Z",
-          "accountHasSalary": false,
+          "accountHasSalary": true,
           "startDate": "2023-01-01",
           "endDate": "2023-09-30",
           "recurringCreditSummary": [
             {
-              "streamDescriptionPattern": "Rental Income from Property XYZ",
-              "streamType": "Rental",
+              "streamDescriptionPattern": "Salary from Company XYZ",
+              "streamType": "Salary",
               "frequency": "Monthly",
-              "avgAmount": "12000.00",
+              "avgAmount": "25000.00",
               "links": [
                 {
                   "ref": "TRANSACTIONS",
@@ -476,20 +453,6 @@ router.get('/income-insights', verifyToken, (req, res) => {
                 "href": "https://api.sau.sandbox.tarabutgateway.io/accountInformation/v1/accounts/c5950a78-122e-3fba-b8c7-8d43914bfe92/transactions?fromBookingDateTime=2023-12-01T00:00:00.000Z&toBookingDateTime=2024-03-01T00:00:00.000Z"
               }
             ]
-          },
-          "creditSummary": {
-            "minTransaction": {
-              "transactionDescription": "Freelance Work",
-              "amount": "200.00",
-              "date": "2023-03-15T00:00:00.123Z"
-            },
-            "maxTransaction": {
-              "transactionDescription": "Property Sale",
-              "amount": "50000.00",
-              "date": "2023-06-20T00:00:00.123Z"
-            },
-            "totalTransactions": "150000.00",
-            "avgMonthlyTransactions": "16666.67"
           }
         }
       ]
@@ -729,46 +692,20 @@ router.get('/spending-insights', verifyToken, (req, res) => {
           "accountCurrency": "SAR",
           "source": "Bank API",
           "lastUpdated": "2023-10-04T00:00:00.123Z",
-          "startDate": "2023-01-01",
-          "endDate": "2023-09-30",
           "recurringDebitSummary": [
             {
-              "streamDescriptionPattern": "Property Maintenance - Monthly",
-              "streamType": "Maintenance",
+              "streamDescriptionPattern": "Monthly Expenses",
+              "streamType": "Regular",
               "frequency": "Monthly",
-              "avgAmount": "2000.00",
+              "avgAmount": "5000.00",
               "links": [
                 {
                   "ref": "TRANSACTIONS",
-                  "href": "https://.../account/<accountId>/transactions?filter=123"
+                  "href": "https://api.sau.sandbox.tarabutgateway.io/accountInformation/v1/accounts/c5950a78-122e-3fba-b8c7-8d43914bfe92/transactions?fromBookingDateTime=2023-12-01T00:00:00.000Z&toBookingDateTime=2024-03-01T00:00:00.000Z"
                 }
               ]
             }
-          ],
-          "irregularSpendingSummary": {
-            "totalAmount": "5000.00",
-            "avgAmount": "500.00",
-            "links": [
-              {
-                "ref": "TRANSACTIONS",
-                "href": "https://.../account/<accountId>/transactions?filter=125"
-              }
-            ]
-          },
-          "SpendingSummary": {
-            "minTransaction": {
-              "transactionDescription": "Coffee Shop - Jeddah",
-              "amount": "35.00",
-              "date": "2023-02-14T00:00:00.123Z"
-            },
-            "maxTransaction": {
-              "transactionDescription": "Property Renovation",
-              "amount": "25000.00",
-              "date": "2023-05-10T00:00:00.123Z"
-            },
-            "totalTransactions": "45000.00",
-            "avgMonthlyTransactions": "5000.00"
-          }
+          ]
         }
       ]
     }
