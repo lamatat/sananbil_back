@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const admin = require('../firebase-config');
+const verifyToken = require('../middleware/auth');
 
 /**
  * @swagger
@@ -8,6 +9,8 @@ const admin = require('../firebase-config');
  *   post:
  *     summary: Get user account ID by national ID
  *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -34,12 +37,14 @@ const admin = require('../firebase-config');
  *                 full_name:
  *                   type: string
  *                   description: User's full name
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
  *       404:
  *         description: User not found
  *       400:
  *         description: Invalid request parameters
  */
-router.post('/account', async (req, res) => {
+router.post('/account', verifyToken, async (req, res) => {
   try {
     const { nationalID } = req.body;
 
@@ -89,6 +94,8 @@ router.post('/account', async (req, res) => {
  *   get:
  *     summary: Get all users
  *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of all users retrieved successfully
@@ -114,10 +121,12 @@ router.post('/account', async (req, res) => {
  *                       accountID:
  *                         type: string
  *                         description: User's account ID
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
  *       500:
  *         description: Internal server error
  */
-router.get('/all', async (req, res) => {
+router.get('/all', verifyToken, async (req, res) => {
   try {
     const usersRef = admin.firestore().collection('user');
     const snapshot = await usersRef.get();
