@@ -3,11 +3,16 @@ const OpenAI = require('openai');
 // Initialize OpenAI only if API key is available
 let openai;
 try {
+  console.log('Checking OpenAI API key...');
   if (process.env.OPENAI_API_KEY) {
+    console.log('OpenAI API key found, initializing client...');
     openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    console.log('OpenAI client initialized successfully');
+  } else {
+    console.log('OpenAI API key not found in environment variables');
   }
 } catch (error) {
-  console.warn('OpenAI initialization failed:', error.message);
+  console.error('OpenAI initialization failed:', error.message);
 }
 
 const llmRiskAssessment = async (userData, loanAmount) => {
@@ -21,10 +26,11 @@ const llmRiskAssessment = async (userData, loanAmount) => {
   }
 
   try {
+    console.log('Preparing prompt for OpenAI...');
     const prompt = `
     Analyze this Saudi user's financial data for loan risk:
-    - Income: ${userData.incomeInsights.recurringCreditSummary[0].avgAmount} SAR
-    - Transactions: ${JSON.stringify(userData.transactions.slice(0, 5))}
+    - Income: ${userData.incomeInsights?.accounts?.[0]?.recurringCreditSummary?.[0]?.avgAmount || 0} SAR
+    - Transactions: ${JSON.stringify(userData.transactions?.slice(0, 5) || [])}
     - Loan Request: ${loanAmount} SAR
 
     Tasks:
@@ -33,12 +39,14 @@ const llmRiskAssessment = async (userData, loanAmount) => {
     3. Return JSON: { "risk_score": 0-100, "reason": "..." }
     `;
 
+    console.log('Sending request to OpenAI...');
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
     });
 
+    console.log('Received response from OpenAI');
     return JSON.parse(response.choices[0].message.content);
   } catch (error) {
     console.error('OpenAI API error:', error.message);

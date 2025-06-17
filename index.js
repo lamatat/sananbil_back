@@ -19,6 +19,7 @@ console.log('Environment check:', {
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL ? 'Set' : 'Not set',
   FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY ? 'Set' : 'Not set',
   JWT_SECRET: process.env.JWT_SECRET ? 'Set' : 'Not set',
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY ? 'Set' : 'Not set',
   VERCEL_URL: process.env.VERCEL_URL || 'Not set'
 });
 
