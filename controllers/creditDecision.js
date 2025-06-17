@@ -37,6 +37,12 @@ const hybridApproval = async (userData, loanAmount) => {
       details: {
         sharia_compliant: true,
         rule_based: true,
+        rule_based_details: {
+          dti_ratio: ruleResult.dti_ratio,
+          liquidity_ratio: ruleResult.liquidity_ratio,
+          balance_trend: ruleResult.balance_trend,
+          explanation: ruleResult.explanation
+        },
         llm_risk_score: llmResult.risk_score,
         llm_available: false
       }
@@ -50,8 +56,15 @@ const hybridApproval = async (userData, loanAmount) => {
       details: {
         sharia_compliant: true,
         rule_based: true,
+        rule_based_details: {
+          dti_ratio: ruleResult.dti_ratio,
+          liquidity_ratio: ruleResult.liquidity_ratio,
+          balance_trend: ruleResult.balance_trend,
+          explanation: ruleResult.explanation
+        },
         llm_risk_score: llmResult.risk_score,
-        llm_available: true
+        llm_available: true,
+        llm_details: llmResult.details
       }
     };
   }
@@ -62,8 +75,15 @@ const hybridApproval = async (userData, loanAmount) => {
     details: {
       sharia_compliant: true,
       rule_based: true,
+      rule_based_details: {
+        dti_ratio: ruleResult.dti_ratio,
+        liquidity_ratio: ruleResult.liquidity_ratio,
+        balance_trend: ruleResult.balance_trend,
+        explanation: ruleResult.explanation
+      },
       llm_risk_score: llmResult.risk_score,
-      llm_available: true
+      llm_available: true,
+      llm_details: llmResult.details
     }
   };
 };
