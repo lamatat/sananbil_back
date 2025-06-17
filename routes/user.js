@@ -224,4 +224,22 @@ router.get('/all', verifyToken, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/user/test-env:
+ *   get:
+ *     summary: Test environment variables
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: Environment variables status
+ */
+router.get('/test-env', (req, res) => {
+  res.json({
+    openai_key_set: process.env.OPENAI_API_KEY ? 'Yes' : 'No',
+    openai_key_length: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0,
+    node_env: process.env.NODE_ENV
+  });
+});
+
 module.exports = router; 
