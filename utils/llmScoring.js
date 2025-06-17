@@ -53,7 +53,20 @@ const llmRiskAssessment = async (userData, loanAmount) => {
     return JSON.parse(response.choices[0].message.content);
   } catch (error) {
     console.error('OpenAI API error:', error.message);
-    // Return a basic risk assessment if API call fails
+    
+    // Handle specific error cases
+    if (error.message.includes('429') || error.message.includes('quota')) {
+      return {
+        risk_score: 50,
+        reason: 'Basic risk assessment (OpenAI quota exceeded - please check billing)',
+        details: {
+          error: 'OpenAI quota exceeded',
+          recommendation: 'Please check your OpenAI billing status and quota limits'
+        }
+      };
+    }
+    
+    // Return a basic risk assessment for other errors
     return {
       risk_score: 50,
       reason: `Basic risk assessment (OpenAI API error: ${error.message})`
