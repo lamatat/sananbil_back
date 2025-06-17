@@ -12,6 +12,12 @@ const userRouter = require('./routes/user');
 
 const app = express();
 
+// Ensure JWT_SECRET is set
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET environment variable is not set');
+  process.exit(1);
+}
+
 // Log environment variables (without sensitive values)
 console.log('Environment check:', {
   NODE_ENV: process.env.NODE_ENV,
@@ -22,9 +28,6 @@ console.log('Environment check:', {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY ? 'Set' : 'Not set',
   VERCEL_URL: process.env.VERCEL_URL || 'Not set'
 });
-
-// JWT Secret Key - In production, use environment variable
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // CORS configuration - More permissive for development
 const corsOptions = {
@@ -72,7 +75,7 @@ const authenticateToken = (req, res, next) => {
     });
   }
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
       return res.status(403).json({
         success: false,
@@ -388,15 +391,18 @@ router.post('/bank/login', async (req, res) => {
       });
     }
 
-    // Generate JWT token
+    // Generate JWT token using environment variable
     const token = jwt.sign(
       { 
         uid: userDoc.id,
         username: userData.username,
         bank_name: userData.bank_name
       },
-      JWT_SECRET,
-      { expiresIn: '24h' }
+      process.env.JWT_SECRET,
+      { 
+        expiresIn: '24h',
+        algorithm: 'HS256' // Explicitly specify the algorithm
+      }
     );
 
     // Remove password from response
