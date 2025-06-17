@@ -4,6 +4,23 @@ const admin = require('../firebase-config');
 const verifyToken = require('../middleware/auth');
 const { hybridApproval } = require('../controllers/creditDecision');
 const axios = require('axios');
+const { getDatabase } = require('firebase-admin/database');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
+
+// Rate limiting configuration
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: 'Too many login attempts from this IP, please try again after 15 minutes',
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+// Apply rate limiting to authentication routes
+router.use('/login', authLimiter);
+router.use('/register', authLimiter);
 
 /**
  * @swagger
