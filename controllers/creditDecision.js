@@ -28,6 +28,21 @@ const hybridApproval = async (userData, loanAmount) => {
 
   // Step 3: LLM for nuanced analysis
   const llmResult = await llmRiskAssessment(userData, loanAmount);
+  
+  // If using fallback assessment, rely more on rule-based decision
+  if (llmResult.reason.includes('Basic risk assessment')) {
+    return {
+      decision: ruleResult.decision,
+      reason: `${ruleResult.reason} (LLM not available)`,
+      details: {
+        sharia_compliant: true,
+        rule_based: true,
+        llm_risk_score: llmResult.risk_score,
+        llm_available: false
+      }
+    };
+  }
+
   if (llmResult.risk_score > 70) {
     return { 
       decision: 'Reject', 
@@ -35,7 +50,8 @@ const hybridApproval = async (userData, loanAmount) => {
       details: {
         sharia_compliant: true,
         rule_based: true,
-        llm_risk_score: llmResult.risk_score
+        llm_risk_score: llmResult.risk_score,
+        llm_available: true
       }
     };
   }
@@ -46,7 +62,8 @@ const hybridApproval = async (userData, loanAmount) => {
     details: {
       sharia_compliant: true,
       rule_based: true,
-      llm_risk_score: llmResult.risk_score
+      llm_risk_score: llmResult.risk_score,
+      llm_available: true
     }
   };
 };
