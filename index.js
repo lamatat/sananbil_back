@@ -6,6 +6,8 @@ const admin = require('./firebase-config');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const bankRouter = require('./routes/bank');
+const tarabutRouter = require('./routes/tarabut');
 
 const app = express();
 
@@ -477,6 +479,8 @@ router.get('/bank/profile', authenticateToken, async (req, res) => {
 
 // Mount API routes
 app.use('/api', router);
+app.use('/api/bank', bankRouter);
+app.use('/api/tarabut', tarabutRouter);
 
 // Serve Swagger UI
 app.use('/api-docs', swaggerUi.serve);
