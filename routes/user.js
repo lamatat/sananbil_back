@@ -93,41 +93,58 @@ router.post('/account', verifyToken, async (req, res) => {
     const baseUrl = 'https://sananbil-back.vercel.app/api/tarabut';
     const token = req.headers.authorization;
 
-    const [
-      balanceResponse,
-      transactionsResponse,
-      balanceInsightsResponse,
-      incomeInsightsResponse,
-      transactionInsightsResponse,
-      spendingInsightsResponse
-    ] = await Promise.all([
-      axios.get(`${baseUrl}/balance?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
-      axios.get(`${baseUrl}/transactions?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
-      axios.get(`${baseUrl}/balance-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
-      axios.get(`${baseUrl}/income-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
-      axios.get(`${baseUrl}/transaction-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
-      axios.get(`${baseUrl}/spending-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } })
-    ]);
+    try {
+      const [
+        balanceResponse,
+        transactionsResponse,
+        balanceInsightsResponse,
+        incomeInsightsResponse,
+        transactionInsightsResponse,
+        spendingInsightsResponse
+      ] = await Promise.all([
+        axios.get(`${baseUrl}/balance?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
+        axios.get(`${baseUrl}/transactions?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
+        axios.get(`${baseUrl}/balance-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
+        axios.get(`${baseUrl}/income-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
+        axios.get(`${baseUrl}/transaction-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
+        axios.get(`${baseUrl}/spending-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } })
+      ]);
 
-    // Combine all data
-    const combinedData = {
-      accountBalance: balanceResponse.data,
-      transactions: transactionsResponse.data.transactions,
-      balanceInsights: balanceInsightsResponse.data,
-      incomeInsights: incomeInsightsResponse.data,
-      transactionInsights: transactionInsightsResponse.data,
-      spendingInsights: spendingInsightsResponse.data
-    };
+      // Validate and structure the data
+      const combinedData = {
+        accountBalance: balanceResponse.data || { balances: [{ amount: { value: 0 } }] },
+        transactions: transactionsResponse.data?.transactions || [],
+        balanceInsights: balanceInsightsResponse.data || { trend: 'neutral' },
+        incomeInsights: incomeInsightsResponse.data || {
+          accounts: [{
+            recurringCreditSummary: [{ avgAmount: 0 }]
+          }]
+        },
+        transactionInsights: transactionInsightsResponse.data || {},
+        spendingInsights: spendingInsightsResponse.data || {
+          accounts: [{
+            recurringDebitSummary: [{ avgAmount: 0 }]
+          }]
+        }
+      };
 
-    // Get credit decision
-    const creditDecision = await hybridApproval(combinedData, loanAmount);
+      // Get credit decision
+      const creditDecision = await hybridApproval(combinedData, loanAmount);
 
-    res.json({
-      accountID: userData.accountID,
-      full_name: userData.full_name,
-      credit_decision: creditDecision,
-      message: 'Account information and credit decision retrieved successfully'
-    });
+      res.json({
+        accountID: userData.accountID,
+        full_name: userData.full_name,
+        credit_decision: creditDecision,
+        message: 'Account information and credit decision retrieved successfully'
+      });
+
+    } catch (error) {
+      console.error('Error fetching Tarabut data:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Failed to fetch financial data: ' + error.message
+      });
+    }
 
   } catch (error) {
     console.error('Error processing request:', error);
