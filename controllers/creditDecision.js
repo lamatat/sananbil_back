@@ -27,11 +27,11 @@ const hybridApproval = async (accountData, loanAmount) => {
     // Get LLM risk assessment
     const llmResult = await llmRiskAssessment(accountData, loanAmount);
     
-    // If either system rejects, the application is rejected
-    if (ruleBasedResult.decision === 'Reject' || llmResult.risk_score > 70) {
+    // If both systems reject, the application is rejected
+    if (ruleBasedResult.decision === 'Reject' && llmResult.risk_score > 70) {
       return {
         decision: 'Reject',
-        reason: 'Application rejected based on risk assessment',
+        reason: 'Application rejected by both rule-based and LLM assessments',
         details: {
           rule_based: {
             decision: ruleBasedResult.decision,
@@ -79,9 +79,9 @@ const hybridApproval = async (accountData, loanAmount) => {
       };
     }
 
-    // If there's a conflict (one approves, one rejects), return for manual review
+    // If there's a conflict (one approves, one rejects), return for bank decision
     return {
-      decision: 'Manual Review Required',
+      decision: 'Up to the bank',
       reason: 'Conflicting assessments between rule-based and LLM systems',
       details: {
         rule_based: {
