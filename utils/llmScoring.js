@@ -6,7 +6,10 @@ try {
   console.log('Checking OpenAI API key...');
   if (process.env.OPENAI_API_KEY) {
     console.log('OpenAI API key found, initializing client...');
-    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    openai = new OpenAI({ 
+      apiKey: process.env.OPENAI_API_KEY,
+      dangerouslyAllowBrowser: true // Add this for browser environments
+    });
     console.log('OpenAI client initialized successfully');
   } else {
     console.log('OpenAI API key not found in environment variables');
@@ -46,14 +49,14 @@ const llmRiskAssessment = async (userData, loanAmount) => {
       response_format: { type: 'json_object' },
     });
 
-    console.log('Received response from OpenAI');
+    console.log('Received response from OpenAI:', response.choices[0].message.content);
     return JSON.parse(response.choices[0].message.content);
   } catch (error) {
     console.error('OpenAI API error:', error.message);
     // Return a basic risk assessment if API call fails
     return {
       risk_score: 50,
-      reason: 'Basic risk assessment (OpenAI API error)'
+      reason: `Basic risk assessment (OpenAI API error: ${error.message})`
     };
   }
 };
