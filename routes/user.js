@@ -22,6 +22,22 @@ const authLimiter = rateLimit({
 router.use('/login', authLimiter);
 router.use('/register', authLimiter);
 
+// Rate limiting configuration for authentication
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: { 
+    error: 'Too many login attempts from this IP, please try again after 15 minutes',
+    status: 429
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  keyGenerator: (req) => {
+    // Use both IP and username for rate limiting to prevent targeted attacks
+    return `${req.ip}-${req.body.username || 'unknown'}`;
+  }
+});
+
 /**
  * @swagger
  * /api/user/account:
@@ -257,6 +273,55 @@ router.get('/test-env', (req, res) => {
     openai_key_length: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0,
     node_env: process.env.NODE_ENV
   });
+});
+
+// Apply rate limiting to login endpoint
+router.post('/login', loginLimiter, async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    const db = getDatabase();
+    const userRef = db.ref('users');
+    const snapshot = await userRef.orderByChild('username').equalTo(username).once('value');
+    const userData = snapshot.val();
+
+    if (!userData) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    const userId = Object.keys(userData)[0];
+    const user = userData[userId];
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    const token = jwt.sign(
+      { 
+        userId,
+        username: user.username,
+        role: user.role || 'user'
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: userId,
+        username: user.username,
+        role: user.role || 'user'
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 module.exports = router; 
