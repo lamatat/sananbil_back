@@ -52,7 +52,7 @@ router.post('/account', async (req, res) => {
     }
 
     // Query Firestore for the user
-    const usersRef = admin.firestore().collection('users');
+    const usersRef = admin.firestore().collection('user');
     const snapshot = await usersRef
       .where('nationalID', '==', nationalID)
       .get();
@@ -119,7 +119,7 @@ router.post('/account', async (req, res) => {
  */
 router.get('/all', async (req, res) => {
   try {
-    const usersRef = admin.firestore().collection('users');
+    const usersRef = admin.firestore().collection('user');
     const snapshot = await usersRef.get();
 
     if (snapshot.empty) {
