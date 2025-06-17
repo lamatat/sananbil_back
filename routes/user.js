@@ -295,6 +295,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     const userId = Object.keys(userData)[0];
     const user = userData[userId];
 
+    // Using the new Promise-based bcrypt.compare
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(401).json({ error: 'Invalid username or password' });
@@ -320,6 +321,46 @@ router.post('/login', loginLimiter, async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update password hashing in registration
+router.post('/register', async (req, res) => {
+  try {
+    const { username, password, email } = req.body;
+    if (!username || !password || !email) {
+      return res.status(400).json({ error: 'Username, password, and email are required' });
+    }
+
+    const db = getDatabase();
+    const userRef = db.ref('users');
+    
+    // Check if username already exists
+    const snapshot = await userRef.orderByChild('username').equalTo(username).once('value');
+    if (snapshot.exists()) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+
+    // Hash password using the new Promise-based bcrypt
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const newUser = {
+      username,
+      password: hashedPassword,
+      email,
+      role: 'user',
+      createdAt: new Date().toISOString()
+    };
+
+    const newUserRef = await userRef.push(newUser);
+    res.status(201).json({
+      message: 'User registered successfully',
+      userId: newUserRef.key
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
