@@ -14,6 +14,12 @@ const ACCOUNT_2 = "c5950a78-122e-3fba-b8c7-8d43914bfe92";
  *     tags: [Tarabut]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: accountId
+ *         schema:
+ *           type: string
+ *         description: Account ID to get balance for
  *     responses:
  *       200:
  *         description: Account balance retrieved successfully
@@ -82,6 +88,29 @@ router.get('/balance', verifyToken, (req, res) => {
  *     tags: [Tarabut]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: accountId
+ *         schema:
+ *           type: string
+ *         description: Account ID to get transactions for
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number
+ *       - in: query
+ *         name: fromBookingDateTime
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start date for transactions
+ *       - in: query
+ *         name: toBookingDateTime
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End date for transactions
  *     responses:
  *       200:
  *         description: Transactions retrieved successfully
@@ -234,6 +263,12 @@ router.get('/transactions', verifyToken, (req, res) => {
  *     tags: [Tarabut]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: accountId
+ *         schema:
+ *           type: string
+ *         description: Account ID to get balance insights for
  *     responses:
  *       200:
  *         description: Balance insights retrieved successfully
@@ -327,6 +362,12 @@ router.get('/balance-insights', verifyToken, (req, res) => {
  *     tags: [Tarabut]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: accountId
+ *         schema:
+ *           type: string
+ *         description: Account ID to get income insights for
  *     responses:
  *       200:
  *         description: Income insights retrieved successfully
@@ -466,6 +507,12 @@ router.get('/income-insights', verifyToken, (req, res) => {
  *     tags: [Tarabut]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: accountId
+ *         schema:
+ *           type: string
+ *         description: Account ID to get transaction insights for
  *     responses:
  *       200:
  *         description: Transaction insights retrieved successfully
@@ -595,6 +642,12 @@ router.get('/transaction-insights', verifyToken, (req, res) => {
  *     tags: [Tarabut]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: accountId
+ *         schema:
+ *           type: string
+ *         description: Account ID to get spending insights for
  *     responses:
  *       200:
  *         description: Spending insights retrieved successfully
