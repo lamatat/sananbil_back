@@ -2,12 +2,14 @@ const express = require('express');
 const router = express.Router();
 const admin = require('../firebase-config');
 const verifyToken = require('../middleware/auth');
+const { hybridApproval } = require('../controllers/creditDecision');
+const axios = require('axios');
 
 /**
  * @swagger
  * /api/user/account:
  *   post:
- *     summary: Get user account ID by national ID
+ *     summary: Get user account ID and credit score by national ID
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
@@ -19,13 +21,17 @@ const verifyToken = require('../middleware/auth');
  *             type: object
  *             required:
  *               - nationalID
+ *               - loanAmount
  *             properties:
  *               nationalID:
  *                 type: string
  *                 description: User's national ID
+ *               loanAmount:
+ *                 type: number
+ *                 description: Requested loan amount in SAR
  *     responses:
  *       200:
- *         description: Account ID found successfully
+ *         description: Account ID and credit score retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -37,6 +43,16 @@ const verifyToken = require('../middleware/auth');
  *                 full_name:
  *                   type: string
  *                   description: User's full name
+ *                 credit_decision:
+ *                   type: object
+ *                   properties:
+ *                     decision:
+ *                       type: string
+ *                       enum: [Approve, Reject]
+ *                     reason:
+ *                       type: string
+ *                     details:
+ *                       type: object
  *       401:
  *         description: Unauthorized - Invalid or missing token
  *       404:
@@ -46,13 +62,13 @@ const verifyToken = require('../middleware/auth');
  */
 router.post('/account', verifyToken, async (req, res) => {
   try {
-    const { nationalID } = req.body;
+    const { nationalID, loanAmount } = req.body;
 
     // Validate input
-    if (!nationalID) {
+    if (!nationalID || !loanAmount) {
       return res.status(400).json({
-        error: 'Missing required field',
-        message: 'nationalID is required'
+        error: 'Missing required fields',
+        message: 'nationalID and loanAmount are required'
       });
     }
 
@@ -73,17 +89,51 @@ router.post('/account', verifyToken, async (req, res) => {
     const userDoc = snapshot.docs[0];
     const userData = userDoc.data();
 
+    // Fetch data from Tarabut APIs
+    const baseUrl = 'https://sananbil-back.vercel.app/api/tarabut';
+    const token = req.headers.authorization;
+
+    const [
+      balanceResponse,
+      transactionsResponse,
+      balanceInsightsResponse,
+      incomeInsightsResponse,
+      transactionInsightsResponse,
+      spendingInsightsResponse
+    ] = await Promise.all([
+      axios.get(`${baseUrl}/balance?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
+      axios.get(`${baseUrl}/transactions?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
+      axios.get(`${baseUrl}/balance-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
+      axios.get(`${baseUrl}/income-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
+      axios.get(`${baseUrl}/transaction-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } }),
+      axios.get(`${baseUrl}/spending-insights?accountId=${userData.accountID}`, { headers: { Authorization: token } })
+    ]);
+
+    // Combine all data
+    const combinedData = {
+      accountBalance: balanceResponse.data,
+      transactions: transactionsResponse.data.transactions,
+      balanceInsights: balanceInsightsResponse.data,
+      incomeInsights: incomeInsightsResponse.data,
+      transactionInsights: transactionInsightsResponse.data,
+      spendingInsights: spendingInsightsResponse.data
+    };
+
+    // Get credit decision
+    const creditDecision = await hybridApproval(combinedData, loanAmount);
+
     res.json({
       accountID: userData.accountID,
       full_name: userData.full_name,
-      message: 'Account ID retrieved successfully'
+      credit_decision: creditDecision,
+      message: 'Account information and credit decision retrieved successfully'
     });
 
   } catch (error) {
-    console.error('Error fetching user account:', error);
+    console.error('Error processing request:', error);
     res.status(500).json({
       error: 'Internal server error',
-      message: 'Failed to fetch user account information'
+      message: 'Failed to process request: ' + error.message
     });
   }
 });
