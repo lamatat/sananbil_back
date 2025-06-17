@@ -14,29 +14,20 @@ const hybridApproval = async (userData, loanAmount) => {
     };
   }
 
-  // Step 2: Fast rule-based check
+  // Step 2: Rule-based check
   const ruleResult = ruleBasedApproval(userData, loanAmount);
-  if (ruleResult.decision === 'Reject') {
-    return {
-      ...ruleResult,
-      details: {
-        sharia_compliant: true,
-        rule_based: false
-      }
-    };
-  }
 
-  // Step 3: LLM for nuanced analysis
+  // Step 3: LLM for nuanced analysis (always perform this check)
   const llmResult = await llmRiskAssessment(userData, loanAmount);
   
-  // If using fallback assessment, rely more on rule-based decision
+  // If using fallback assessment
   if (llmResult.reason.includes('Basic risk assessment')) {
     return {
       decision: ruleResult.decision,
       reason: `${ruleResult.reason} (LLM not available)`,
       details: {
         sharia_compliant: true,
-        rule_based: true,
+        rule_based: ruleResult.decision === 'Approve',
         rule_based_details: {
           dti_ratio: ruleResult.dti_ratio,
           liquidity_ratio: ruleResult.liquidity_ratio,
@@ -49,10 +40,53 @@ const hybridApproval = async (userData, loanAmount) => {
     };
   }
 
-  if (llmResult.risk_score > 70) {
+  // If both rule-based and LLM reject
+  if (ruleResult.decision === 'Reject' && llmResult.risk_score > 70) {
     return { 
       decision: 'Reject', 
-      reason: `LLM: ${llmResult.reason}`,
+      reason: `Rule-based: ${ruleResult.reason}, LLM: ${llmResult.reason}`,
+      details: {
+        sharia_compliant: true,
+        rule_based: false,
+        rule_based_details: {
+          dti_ratio: ruleResult.dti_ratio,
+          liquidity_ratio: ruleResult.liquidity_ratio,
+          balance_trend: ruleResult.balance_trend,
+          explanation: ruleResult.explanation
+        },
+        llm_risk_score: llmResult.risk_score,
+        llm_available: true,
+        llm_details: llmResult.details
+      }
+    };
+  }
+
+  // If rule-based rejects but LLM approves
+  if (ruleResult.decision === 'Reject' && llmResult.risk_score <= 70) {
+    return { 
+      decision: 'Approve', 
+      reason: `Rule-based rejected but LLM approved: ${llmResult.reason}`,
+      details: {
+        sharia_compliant: true,
+        rule_based: false,
+        rule_based_details: {
+          dti_ratio: ruleResult.dti_ratio,
+          liquidity_ratio: ruleResult.liquidity_ratio,
+          balance_trend: ruleResult.balance_trend,
+          explanation: ruleResult.explanation
+        },
+        llm_risk_score: llmResult.risk_score,
+        llm_available: true,
+        llm_details: llmResult.details
+      }
+    };
+  }
+
+  // If rule-based approves but LLM rejects
+  if (ruleResult.decision === 'Approve' && llmResult.risk_score > 70) {
+    return { 
+      decision: 'Reject', 
+      reason: `Rule-based approved but LLM rejected: ${llmResult.reason}`,
       details: {
         sharia_compliant: true,
         rule_based: true,
@@ -69,6 +103,7 @@ const hybridApproval = async (userData, loanAmount) => {
     };
   }
 
+  // If both rule-based and LLM approve
   return { 
     decision: 'Approve', 
     reason: 'Passed all checks',
