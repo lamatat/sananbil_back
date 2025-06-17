@@ -17,6 +17,9 @@ FIREBASE_DATABASE_URL=your-database-url
 
 # JWT Secret
 JWT_SECRET=your-jwt-secret
+
+# OpenAI Configuration
+OPENAI_API_KEY=your-openai-api-key
 ```
 
 3. Get Firebase credentials:
@@ -26,7 +29,14 @@ JWT_SECRET=your-jwt-secret
    - Click "Generate New Private Key"
    - Use the values from the downloaded JSON file to fill in your `.env` file
 
-4. Start the server:
+4. Get OpenAI API key:
+   - Go to OpenAI Platform (https://platform.openai.com)
+   - Sign in or create an account
+   - Go to API Keys section
+   - Create a new secret key
+   - Copy the key and add it to your `.env` file
+
+5. Start the server:
 ```bash
 node index.js
 ```
@@ -38,6 +48,7 @@ node index.js
 - `FIREBASE_PRIVATE_KEY`: The private key from your Firebase service account (include the entire key with newlines)
 - `FIREBASE_DATABASE_URL`: Your Firebase database URL
 - `JWT_SECRET`: Secret key for JWT token generation
+- `OPENAI_API_KEY`: Your OpenAI API key for LLM-based credit scoring
 
 ## API Documentation
 
